@@ -1,1 +1,313 @@
 
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  #app {
+    min-height: 480px;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  #vignette {
+    position: absolute; inset: 0; border-radius: 12px;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.07) 100%);
+    pointer-events: none;
+  }
+  #btn-wrap {
+    position: relative;
+    width: 240px; height: 240px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  #btn-shadow {
+    position: absolute;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 60% 60%, rgba(0,0,0,0.22) 0%, transparent 70%);
+    top: 18px; left: 10px;
+    transition: opacity 0.08s, transform 0.08s;
+    pointer-events: none;
+  }
+  #btn-edge {
+    position: absolute;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: #600000;
+    top: 4px; left: 10px;
+    transition: transform 0.08s;
+    pointer-events: none;
+  }
+  #btn-body {
+    position: relative;
+    width: 210px; height: 210px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 35%, #ff6b6b 0%, #d42b2b 45%, #8b0000 100%);
+    border: 3px solid #8b0000;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.08s, box-shadow 0.08s;
+    box-shadow: 0 6px 0 #600000, 0 8px 18px rgba(0,0,0,0.35);
+    flex-shrink: 0;
+  }
+  #btn-shine {
+    position: absolute;
+    width: 90px; height: 60px;
+    border-radius: 50%;
+    background: rgba(255,200,200,0.55);
+    top: 30px; left: 30px;
+    filter: blur(6px);
+    pointer-events: none;
+  }
+  #btn-shine2 {
+    position: absolute;
+    width: 55px; height: 35px;
+    border-radius: 50%;
+    background: rgba(255,230,230,0.45);
+    top: 38px; left: 42px;
+    filter: blur(3px);
+    pointer-events: none;
+  }
+  #btn-inner-ring {
+    position: absolute;
+    width: 182px; height: 182px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(100,0,0,0.35);
+    pointer-events: none;
+  }
+  #btn-wrap.pressed #btn-body {
+    transform: translateY(6px);
+    box-shadow: 0 1px 0 #600000, 0 2px 8px rgba(0,0,0,0.35);
+  }
+  #btn-wrap.pressed #btn-edge { transform: translateY(4px); }
+  #btn-wrap.pressed #btn-shadow { opacity: 0.4; transform: scale(0.92); }
+  #controls {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    z-index: 1;
+  }
+  #file-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px; border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white; cursor: pointer;
+    font-size: 14px; color: #444;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  #file-label:hover { background: #f0f0f0; border-color: #aaa; }
+  #file-input { display: none; }
+  #status {
+    font-size: 13px; color: #777;
+    max-width: 260px; text-align: center;
+    min-height: 20px;
+  }
+  #progress-wrap {
+    width: 220px; height: 4px;
+    background: #ddd; border-radius: 2px;
+    overflow: hidden; display: none;
+  }
+  #progress-bar {
+    height: 100%; width: 0%;
+    background: #d42b2b;
+    border-radius: 2px;
+    transition: width 0.5s linear;
+  }
+</style>
+
+<div id="app">
+  <div id="vignette"></div>
+  <div id="btn-wrap" role="button" aria-label="Play music" tabindex="0">
+    <div id="btn-shadow"></div>
+    <div id="btn-edge"></div>
+    <div id="btn-body">
+      <div id="btn-shine"></div>
+      <div id="btn-shine2"></div>
+      <div id="btn-inner-ring"></div>
+    </div>
+  </div>
+  <div id="controls">
+    <label id="file-label" for="file-input">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Choose MP3
+    </label>
+    <input type="file" id="file-input" accept="audio/*">
+    <div id="status">Pick an MP3, then press the button</div>
+    <div id="progress-wrap"><div id="progress-bar"></div></div>
+  </div>
+</div>
+
+<script>
+const btnWrap = document.getElementById('btn-wrap');
+const fileInput = document.getElementById('file-input');
+const status = document.getElementById('status');
+const progressWrap = document.getElementById('progress-wrap');
+const progressBar = document.getElementById('progress-bar');
+
+let audioCtx = null;
+let musicAudio = null;
+let musicUrl = null;
+let musicName = '';
+let progressInterval = null;
+
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playXPClick() {
+  try {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.55, now);
+    masterGain.connect(ctx.destination);
+
+    // === LAYER 1: Initial plastic "tak" transient ===
+    // Short noise burst filtered to a mid-bright crack
+    const bufLen = ctx.sampleRate * 0.018;
+    const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const noiseData = noiseBuf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) {
+      noiseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 3.5);
+    }
+    const noiseSource = ctx.createBufferSource();
+    noiseSource.buffer = noiseBuf;
+
+    const noiseBp = ctx.createBiquadFilter();
+    noiseBp.type = 'bandpass';
+    noiseBp.frequency.setValueAtTime(2800, now);
+    noiseBp.Q.setValueAtTime(1.2, now);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(1.4, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+    noiseSource.connect(noiseBp);
+    noiseBp.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noiseSource.start(now);
+    noiseSource.stop(now + 0.02);
+
+    // === LAYER 2: Tonal "tok" body — the warm resonant part ===
+    // Two detuned oscillators pitched like a physical switch mechanism
+    const freqs = [{ f: 820, detune: 0 }, { f: 1240, detune: 8 }];
+    freqs.forEach(({ f, detune }) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, now);
+      osc.frequency.exponentialRampToValueAtTime(f * 0.55, now + 0.055);
+      osc.detune.setValueAtTime(detune, now);
+
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0.0, now);
+      oscGain.gain.linearRampToValueAtTime(0.45, now + 0.002);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+
+      const lpf = ctx.createBiquadFilter();
+      lpf.type = 'lowpass';
+      lpf.frequency.setValueAtTime(3200, now);
+      lpf.frequency.exponentialRampToValueAtTime(800, now + 0.06);
+
+      osc.connect(lpf);
+      lpf.connect(oscGain);
+      oscGain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    });
+
+    // === LAYER 3: Sub thump — the tiny physical "weight" of the click ===
+    const sub = ctx.createOscillator();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(180, now);
+    sub.frequency.exponentialRampToValueAtTime(60, now + 0.04);
+
+    const subGain = ctx.createGain();
+    subGain.gain.setValueAtTime(0.5, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+    sub.connect(subGain);
+    subGain.connect(masterGain);
+    sub.start(now);
+    sub.stop(now + 0.05);
+
+    // === LAYER 4: Faint high "tick" — the release click (XP had a subtle two-part sound) ===
+    const tick = ctx.createOscillator();
+    tick.type = 'sine';
+    tick.frequency.setValueAtTime(3800, now + 0.022);
+
+    const tickGain = ctx.createGain();
+    tickGain.gain.setValueAtTime(0.0, now + 0.022);
+    tickGain.gain.linearRampToValueAtTime(0.12, now + 0.026);
+    tickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.048);
+
+    tick.connect(tickGain);
+    tickGain.connect(masterGain);
+    tick.start(now + 0.022);
+    tick.stop(now + 0.05);
+
+  } catch(e) {}
+}
+
+function updateProgress() {
+  if (!musicAudio || musicAudio.paused) return;
+  const pct = musicAudio.duration ? (musicAudio.currentTime / musicAudio.duration) * 100 : 0;
+  progressBar.style.width = pct.toFixed(1) + '%';
+  const rem = musicAudio.duration - musicAudio.currentTime;
+  const m = Math.floor(rem / 60);
+  const s = Math.floor(rem % 60).toString().padStart(2, '0');
+  status.textContent = '▶  ' + musicName + '  −' + m + ':' + s;
+}
+
+function playMusic() {
+  if (!musicUrl) { status.textContent = 'Pick an MP3 first!'; return; }
+  if (musicAudio) { musicAudio.pause(); musicAudio.currentTime = 0; clearInterval(progressInterval); }
+  musicAudio = new Audio(musicUrl);
+  musicAudio.play().then(() => {
+    progressWrap.style.display = 'block';
+    progressInterval = setInterval(updateProgress, 500);
+    musicAudio.onended = () => {
+      clearInterval(progressInterval);
+      progressBar.style.width = '0%';
+      status.textContent = musicName + ' — done';
+    };
+  }).catch(() => { status.textContent = 'Could not play audio.'; });
+}
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (musicUrl) URL.revokeObjectURL(musicUrl);
+  musicUrl = URL.createObjectURL(file);
+  musicName = file.name.replace(/\.[^.]+$/, '');
+  status.textContent = 'Loaded: ' + musicName;
+  progressBar.style.width = '0%';
+});
+
+let pressing = false;
+
+function onPress() {
+  if (pressing) return;
+  pressing = true;
+  btnWrap.classList.add('pressed');
+  playXPClick();
+}
+
+function onRelease() {
+  if (!pressing) return;
+  pressing = false;
+  btnWrap.classList.remove('pressed');
+  setTimeout(playMusic, 60);
+}
+
+btnWrap.addEventListener('mousedown', onPress);
+window.addEventListener('mouseup', onRelease);
+btnWrap.addEventListener('touchstart', (e) => { e.preventDefault(); onPress(); }, { passive: false });
+window.addEventListener('touchend', onRelease);
+btnWrap.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onPress(); } });
+btnWrap.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') onRelease(); });
+</script>
