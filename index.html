@@ -21,16 +21,42 @@
       text-align: center;
       margin-bottom: 56px;
     }
-    #header h1 {
-      font-size: 42px;
-      font-weight: 700;
+    #logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #logo-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #d42b2b;
+      transform: rotate(-8deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #logo-badge span {
+      transform: rotate(8deg);
+      color: #fff;
+      font-size: 26px;
+      font-weight: 800;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #logo h1 {
+      font-size: 40px;
+      font-weight: 800;
       letter-spacing: -1.5px;
       color: #111;
+    }
+    #logo h1 span {
+      color: #d42b2b;
     }
     #header p {
       font-size: 15px;
       color: #999;
-      margin-top: 10px;
+      margin-top: 12px;
     }
     .grid {
       display: grid;
@@ -86,7 +112,9 @@
     }
 
     @media (max-width: 480px) {
-      #header h1 { font-size: 32px; }
+      #logo h1 { font-size: 30px; }
+      #logo-badge { width: 40px; height: 40px; border-radius: 10px; }
+      #logo-badge span { font-size: 21px; }
       .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
     }
   </style>
@@ -95,7 +123,10 @@
   <div id="page">
 
     <div id="header">
-      <h1>welch-fun</h1>
+      <div id="logo">
+        <div id="logo-badge"><span>w</span></div>
+        <h1>welch<span>fun</span></h1>
+      </div>
       <p>A growing collection of little things to click, press, and play with.</p>
     </div>
 
@@ -120,6 +151,9 @@
         TO ADD A NEW APP, copy one of the <a class="card"> blocks above,
         change the href to your new file (e.g. href="snake-game.html"),
         update the icon SVG, title, and description.
+
+        DON'T FORGET: paste the "Home" button snippet into the new app's
+        HTML file so users can navigate back here.
       -->
 
     </div>
