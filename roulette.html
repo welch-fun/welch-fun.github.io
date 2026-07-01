@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roulette — welch-fun</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f0f0f;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 60px;
+  }
+
+  #home-btn {
+    position: fixed; top: 16px; left: 16px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+    text-decoration: none; color: #ccc; font-size: 13px; font-weight: 600;
+    z-index: 999; transition: background 0.15s;
+  }
+  #home-btn:hover { background: rgba(255,255,255,0.14); }
+
+  h1 {
+    margin-top: 48px;
+    font-size: 32px; font-weight: 800; letter-spacing: -1px;
+  }
+  h1 span { color: #d42b2b; }
+
+  /* POINTS BAR */
+  #points-bar {
+    margin-top: 16px;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 15px; font-weight: 700;
+    color: #aaa;
+  }
+  #points-bar span { color: #fff; font-size: 20px; font-weight: 800; }
+
+  /* WHEEL */
+  #wheel-wrap {
+    margin-top: 28px;
+    position: relative;
+    width: 240px; height: 240px;
+  }
+  #wheel-canvas {
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 6px #1a1a1a, 0 0 0 10px #333, 0 8px 40px rgba(0,0,0,0.7);
+  }
+  #wheel-pointer {
+    position: absolute;
+    top: -18px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 22px solid #ffd700;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+
+  #spin-result {
+    margin-top: 14px;
+    min-height: 36px;
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    text-align: center;
+  }
+
+  /* BETS */
+  #bet-section {
+    margin-top: 24px;
+    width: 100%; max-width: 520px;
+    padding: 0 20px;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    color: #555; text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  /* SIMPLE BETS */
+  #simple-bets {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .bet-btn {
+    padding: 14px 8px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #ccc; font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    text-align: center;
+  }
+  .bet-btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+  .bet-btn.selected { border-color: #d42b2b; color: #fff; background: rgba(212,43,43,0.15); }
+  .bet-btn.red-bet  { border-color: rgba(212,43,43,0.4); color: #d42b2b; }
+  .bet-btn.black-bet { border-color: rgba(255,255,255,0.2); }
+  .bet-btn.red-bet.selected  { background: rgba(212,43,43,0.2); }
+  .bet-btn.black-bet.selected { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
+
+  /* CHIPS */
+  #chip-row {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+  }
+
+  .chip {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 3px dashed;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-align: center; line-height: 1.1;
+  }
+  .chip:hover { transform: scale(1.08); }
+  .chip.selected { box-shadow: 0 0 0 3px #fff; transform: scale(1.1); }
+  .chip-10    { background: #1e3a5f; border-color: #4a90d9; color: #7ab8f5; }
+  .chip-100   { background: #1f3d1f; border-color: #4caf50; color: #7ed97e; }
+  .chip-500   { background: #3d1f1f; border-color: #d42b2b; color: #ff7070; }
+  .chip-1000  { background: #2d2010; border-color: #ff9800; color: #ffb74d; }
+  .chip-2500  { background: #2a1a3d; border-color: #9c27b0; color: #ce93d8; }
+  .chip-5000  { background: #1a1a1a; border-color: #ffd700; color: #ffd700; }
+
+  /* CURRENT BET */
+  #bet-display {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  #bet-display .label { font-size: 12px; color: #555; font-weight: 600; }
+  #bet-display .value { font-size: 18px; font-weight: 800; color: #fff; }
+
+  /* SPIN BTN */
+  #spin-btn {
+    width: 100%; padding: 16px;
+    background: #d42b2b; color: #fff;
+    border: none; border-radius: 14px;
+    font-size: 17px; font-weight: 800;
+    cursor: pointer; letter-spacing: -0.3px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #spin-btn:hover:not(:disabled) { background: #e03535; }
+  #spin-btn:active:not(:disabled) { transform: scale(0.98); }
+  #spin-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* RESULT POPUP */
+  #round-result {
+    display: none;
+    margin-top: 12px;
+    padding: 14px; border-radius: 12px;
+    text-align: center; font-size: 17px; font-weight: 700;
+  }
+  #round-result.win  { background: #0d2b0d; color: #4caf50; border: 1px solid #4caf5033; }
+  #round-result.lose { background: #2b0d0d; color: #d42b2b; border: 1px solid #d42b2b33; }
+
+  /* BANKRUPT SCREEN */
+  #bankrupt-screen {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+    padding: 24px;
+  }
+  #bankrupt-screen.show { display: flex; }
+  #bankrupt-screen h2 {
+    font-size: 48px; font-weight: 800;
+    color: #d42b2b; letter-spacing: -2px;
+    animation: shake 0.5s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-12px); }
+    40%      { transform: translateX(12px); }
+    60%      { transform: translateX(-8px); }
+    80%      { transform: translateX(8px); }
+  }
+  #bankrupt-screen p {
+    font-size: 16px; color: #666; max-width: 280px; line-height: 1.5;
+  }
+  #restart-btn {
+    margin-top: 8px;
+    padding: 14px 40px;
+    background: #d42b2b; color: #fff;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; letter-spacing: -0.3px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #restart-btn:hover { background: #e03535; }
+  #restart-btn:active { transform: scale(0.97); }
+</style>
+</head>
+<body>
+
+<a id="home-btn" href="index.html">&#8592; Home</a>
+
+<h1>Rou<span>lette</span></h1>
+
+<div id="points-bar">Points: <span id="points-display">1000</span></div>
+
+<div id="wheel-wrap">
+  <div id="wheel-pointer"></div>
+  <canvas id="wheel-canvas" width="480" height="480"></canvas>
+</div>
+
+<div id="spin-result"></div>
+
+<div id="bet-section">
+  <div class="section-label">Bet type</div>
+  <div id="simple-bets">
+    <div class="bet-btn red-bet"   data-bet="red">Red</div>
+    <div class="bet-btn black-bet" data-bet="black">Black</div>
+    <div class="bet-btn"           data-bet="odd">Odd</div>
+    <div class="bet-btn"           data-bet="even">Even</div>
+    <div class="bet-btn"           data-bet="low">1–18</div>
+    <div class="bet-btn"           data-bet="high">19–36</div>
+  </div>
+
+  <div class="section-label">Chip size</div>
+  <div id="chip-row">
+    <div class="chip chip-10"   data-amount="10">10</div>
+    <div class="chip chip-100"  data-amount="100">100</div>
+    <div class="chip chip-500"  data-amount="500">500</div>
+    <div class="chip chip-1000" data-amount="1000">1K</div>
+    <div class="chip chip-2500" data-amount="2500">2.5K</div>
+    <div class="chip chip-5000" data-amount="5000">5K</div>
+  </div>
+
+  <div id="bet-display">
+    <span class="label">Current bet</span>
+    <span class="value" id="bet-display-val">— pts</span>
+  </div>
+
+  <button id="spin-btn" disabled>Spin</button>
+
+  <div id="round-result"></div>
+</div>
+
+<!-- BANKRUPT -->
+<div id="bankrupt-screen">
+  <h2>BANKRUPT</h2>
+  <p>You've lost everything. The wheel gives, and the wheel takes away.</p>
+  <button id="restart-btn">Start over with 1,000 pts</button>
+</div>
+
+<script>
+// ── Roulette numbers 0–36 with colours ────────────────────────────────────
+const RED_NUMS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+
+function numColor(n) {
+  if (n === 0) return '#1a7a1a';
+  return RED_NUMS.includes(n) ? '#c8201f' : '#111';
+}
+
+// ── Draw wheel ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('wheel-canvas');
+const ctx = canvas.getContext('2d');
+const CX = 240, CY = 240, R = 230, INNER = 60;
+const SLICES = WHEEL_ORDER.length;
+const ARC = (2 * Math.PI) / SLICES;
+
+let wheelAngle = 0;
+
+function drawWheel(angle) {
+  ctx.clearRect(0, 0, 480, 480);
+  for (let i = 0; i < SLICES; i++) {
+    const start = angle + i * ARC - Math.PI / 2;
+    const end   = start + ARC;
+    const num   = WHEEL_ORDER[i];
+
+    // Slice
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.arc(CX, CY, R, start, end);
+    ctx.closePath();
+    ctx.fillStyle = numColor(num);
+    ctx.fill();
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Number label
+    const mid = start + ARC / 2;
+    const tx = CX + (R - 28) * Math.cos(mid);
+    const ty = CY + (R - 28) * Math.sin(mid);
+    ctx.save();
+    ctx.translate(tx, ty);
+    ctx.rotate(mid + Math.PI / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(num, 0, 0);
+    ctx.restore();
+  }
+
+  // Center hub
+  ctx.beginPath();
+  ctx.arc(CX, CY, INNER, 0, Math.PI * 2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(CX, CY, 16, 0, Math.PI * 2);
+  ctx.fillStyle = '#d42b2b';
+  ctx.fill();
+}
+
+drawWheel(0);
+
+// ── State ─────────────────────────────────────────────────────────────────
+let points = 1000;
+let selectedBet = null;
+let selectedChip = null;
+let betAmount = 0;
+let spinning = false;
+
+function updatePointsDisplay() {
+  document.getElementById('points-display').textContent = points.toLocaleString();
+}
+
+function updateBetDisplay() {
+  const el = document.getElementById('bet-display-val');
+  if (!selectedBet || !betAmount) {
+    el.textContent = '— pts';
+    document.getElementById('spin-btn').disabled = true;
+  } else {
+    el.textContent = betAmount.toLocaleString() + ' pts on ' + betLabel(selectedBet);
+    document.getElementById('spin-btn').disabled = spinning || betAmount > points;
+  }
+}
+
+function betLabel(b) {
+  const map = { red:'Red', black:'Black', odd:'Odd', even:'Even', low:'1–18', high:'19–36' };
+  return map[b] || b;
+}
+
+// ── Bet type selection ────────────────────────────────────────────────────
+document.querySelectorAll('.bet-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (spinning) return;
+    document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedBet = btn.dataset.bet;
+    updateBetDisplay();
+  });
+});
+
+// ── Chip selection ────────────────────────────────────────────────────────
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    if (spinning) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedChip = parseInt(chip.dataset.amount);
+    betAmount = selectedChip;
+    updateBetDisplay();
+  });
+});
+
+// ── Spin ──────────────────────────────────────────────────────────────────
+document.getElementById('spin-btn').addEventListener('click', () => {
+  if (!selectedBet || !betAmount || spinning) return;
+  if (betAmount > points) return;
+
+  spinning = true;
+  document.getElementById('spin-btn').disabled = true;
+  document.getElementById('round-result').style.display = 'none';
+  document.getElementById('spin-result').textContent = '';
+
+  // Pick result
+  const landingSlice = Math.floor(Math.random() * SLICES);
+  const landingNum   = WHEEL_ORDER[landingSlice];
+
+  // Spin animation: multiple full rotations + land on slice
+  // Pointer is at top (angle offset = 0 → slice 0 is at top)
+  // Target angle: we want slice landingSlice at top
+  // Each slice = ARC radians. Slice i starts at i*ARC from top.
+  // We need to rotate the wheel so landingSlice aligns with pointer at top.
+  const targetSliceAngle = -(landingSlice * ARC);
+  const spins = 6 + Math.random() * 4; // 6–10 full rotations
+  const totalRotation = spins * Math.PI * 2 + targetSliceAngle - (wheelAngle % (Math.PI * 2));
+  const startAngle = wheelAngle;
+  const endAngle   = wheelAngle + totalRotation;
+  const duration   = 4000 + Math.random() * 1000;
+  const startTime  = performance.now();
+
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 4);
+  }
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    wheelAngle = startAngle + totalRotation * easeOut(t);
+    drawWheel(wheelAngle);
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelAngle = endAngle;
+      drawWheel(wheelAngle);
+      resolveRound(landingNum);
+    }
+  }
+
+  requestAnimationFrame(animate);
+});
+
+function resolveRound(num) {
+  spinning = false;
+  const color = num === 0 ? 'green' : (RED_NUMS.includes(num) ? 'red' : 'black');
+
+  // Display landed number
+  const colorStyle = color === 'red' ? '#d42b2b' : color === 'green' ? '#4caf50' : '#aaa';
+  document.getElementById('spin-result').innerHTML =
+    `<span style="color:${colorStyle}">${num}</span> <span style="color:#555; font-size:14px; font-weight:600">${color.toUpperCase()}</span>`;
+
+  // Check win
+  let won = false;
+  switch (selectedBet) {
+    case 'red':   won = color === 'red'; break;
+    case 'black': won = color === 'black'; break;
+    case 'odd':   won = num !== 0 && num % 2 !== 0; break;
+    case 'even':  won = num !== 0 && num % 2 === 0; break;
+    case 'low':   won = num >= 1 && num <= 18; break;
+    case 'high':  won = num >= 19 && num <= 36; break;
+  }
+
+  const rr = document.getElementById('round-result');
+  if (won) {
+    points += betAmount;
+    rr.textContent = '+' + betAmount.toLocaleString() + ' pts — You win!';
+    rr.className = 'win';
+  } else {
+    points -= betAmount;
+    rr.textContent = '-' + betAmount.toLocaleString() + ' pts — You lose.';
+    rr.className = 'lose';
+  }
+  rr.style.display = 'block';
+  updatePointsDisplay();
+
+  if (points <= 0) {
+    points = 0;
+    updatePointsDisplay();
+    setTimeout(() => {
+      document.getElementById('bankrupt-screen').classList.add('show');
+    }, 800);
+  } else {
+    document.getElementById('spin-btn').disabled = (betAmount > points);
+  }
+}
+
+// ── Restart ───────────────────────────────────────────────────────────────
+document.getElementById('restart-btn').addEventListener('click', () => {
+  points = 1000;
+  selectedBet = null;
+  selectedChip = null;
+  betAmount = 0;
+  spinning = false;
+  document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('round-result').style.display = 'none';
+  document.getElementById('spin-result').textContent = '';
+  document.getElementById('bankrupt-screen').classList.remove('show');
+  updatePointsDisplay();
+  updateBetDisplay();
+  drawWheel(0);
+  wheelAngle = 0;
+});
+
+updatePointsDisplay();
+updateBetDisplay();
+</script>
+</body>
+</html>
