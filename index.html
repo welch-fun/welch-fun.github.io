@@ -2,121 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>welch-fun</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101114">
+  <meta name="description" content="Welchy-Wagers — a polished little arcade with Blackjack, Roulette and the Red Button.">
+  <title>Welchy-Wagers — The Private Arcade</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ffffff; color: #111; min-height: 100vh;
-    }
-    #page { max-width: 780px; margin: 0 auto; padding: 56px 24px 80px; }
-    #header { text-align: center; margin-bottom: 56px; }
-    #logo { display: inline-flex; align-items: center; gap: 14px; }
-    #logo-badge {
-      width: 48px; height: 48px; border-radius: 12px;
-      background: #d42b2b; transform: rotate(-8deg);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    #logo-badge span {
-      transform: rotate(8deg); color: #fff;
-      font-size: 26px; font-weight: 800;
-    }
-    #logo h1 { font-size: 40px; font-weight: 800; letter-spacing: -1.5px; color: #111; }
-    #logo h1 span { color: #d42b2b; }
-    #header p { font-size: 15px; color: #999; margin-top: 12px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 16px; }
-    .card {
-      background: #fff; border: 1px solid #e8e8e8; border-radius: 18px;
-      padding: 30px 20px 24px; cursor: pointer; text-decoration: none;
-      display: flex; flex-direction: column; align-items: center; gap: 13px;
-      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; color: inherit;
-    }
-    .card:hover { border-color: #c8c8c8; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
-    .card:active { transform: translateY(-1px); }
-    .icon { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .card-title { font-size: 15px; font-weight: 600; color: #111; text-align: center; }
-    .card-desc  { font-size: 12px; color: #aaa; text-align: center; line-height: 1.5; }
-    #footer { text-align: center; margin-top: 64px; font-size: 12px; color: #ccc; letter-spacing: 0.3px; }
-    @media (max-width: 480px) {
-      #logo h1 { font-size: 30px; }
-      #logo-badge { width: 40px; height: 40px; border-radius: 10px; }
-      #logo-badge span { font-size: 21px; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-    }
-  </style>
+    :root{color-scheme:dark;--bg:#101114;--panel:#191b20;--panel2:#20232a;--line:#30343d;--muted:#9a9eaa;--text:#f5f6f8;--red:#ef4444;--gold:#f4c76b}
+    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% -18%,#473b2a 0,transparent 58%),radial-gradient(ellipse at 50% 100%,#142d22 0,transparent 60%),var(--bg)}
+    a{color:inherit}.shell{width:min(1040px,calc(100% - 40px));margin:auto;padding:64px 0 32px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:64px}
+    .brand{display:flex;align-items:center;gap:13px;text-decoration:none}.mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#fb6666,#c52232);box-shadow:0 8px 28px #e43a3a35;font-weight:900;font-size:25px;transform:rotate(-5deg)}.brand-name{font-size:23px;font-weight:850;letter-spacing:-1px}.brand-name span{color:#ff6868}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2.5px;color:var(--gold);font-weight:750}
+    .intro{max-width:650px;margin:0 auto 38px;text-align:center}.intro h1{font-size:clamp(38px,7vw,64px);line-height:1.02;letter-spacing:-3px;margin:13px 0 15px}.intro p{color:var(--muted);font-size:16px;line-height:1.7;margin:0}
+    .section-head{display:flex;align-items:end;justify-content:space-between;margin:52px 0 18px}.section-head h2{font-size:17px;margin:0;letter-spacing:-.3px}.count{font-size:12px;color:var(--muted)}
+    .games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .game{min-height:244px;padding:23px;background:linear-gradient(145deg,rgba(42,40,34,.96),rgba(23,25,27,.98));border:1px solid #514632;border-radius:20px;text-decoration:none;display:flex;flex-direction:column;align-items:flex-start;transition:transform .18s,border-color .18s,box-shadow .18s}
+    .game:hover{transform:translateY(-4px);border-color:#555b68;box-shadow:0 16px 40px #0005}.game:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+    .game-icon{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin-bottom:25px;background:linear-gradient(145deg,#39352c,#22252a);border:1px solid #65553a;box-shadow:inset 0 1px 0 #ffffff20,0 10px 24px #0005}
+    .game h3{font-size:18px;margin:0 0 7px;letter-spacing:-.4px}.game p{font-size:13px;line-height:1.55;color:var(--muted);margin:0;max-width:240px}.launch{margin-top:auto;padding-top:20px;font-size:12px;font-weight:750;color:#e9c77d}
+    .game:nth-child(2) .game-icon{background:#222c26}.game:nth-child(3) .game-icon{background:#2b2630}
+    footer{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #292c33;margin-top:62px;padding-top:20px;color:#777d89;font-size:12px}
+    @media(max-width:760px){.shell{padding-top:36px}.games{grid-template-columns:1fr 1fr}header{margin-bottom:48px}.game{min-height:220px}}
+    @media(max-width:480px){.shell{width:min(100% - 28px,440px)}.games{grid-template-columns:1fr}.game{min-height:190px}.game-icon{margin-bottom:17px}.intro h1{letter-spacing:-2px}.section-head{margin-top:38px}footer{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+  
+    .brand-name span{color:#d9b66e}.mark{background:linear-gradient(145deg,#e6ca8a,#8c682c);color:#211a0d}.eyebrow{color:#d8bd83}
+    .game{position:relative;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff0a,0 18px 40px #0003}.game:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,#ffffff08,transparent 42%)}
+    .game-icon{box-shadow:inset 0 1px 0 #ffffff20,0 8px 20px #0004}.game:nth-child(2) .game-icon{color:#d9c28b}.game:nth-child(3) .game-icon{color:#d7ad74}
+    .launch{color:#e2c27f}.game h3{font-size:19px}.intro h1{background:linear-gradient(180deg,#fff9e9,#d9c18d);background-clip:text;-webkit-background-clip:text;color:transparent}
+    @media(max-width:760px){.games{grid-template-columns:1fr 1fr}} @media(max-width:480px){.games{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div id="page">
-    <div id="header">
-      <div id="logo">
-        <div id="logo-badge"><span>w</span></div>
-        <h1>welch<span>fun</span></h1>
-      </div>
-      <p>A growing collection of little things to click, press, and play with.</p>
-    </div>
-
-    <div class="grid">
-
-      <!-- RED BUTTON -->
-      <a class="card" href="red-button.html">
-        <div class="icon" style="background:#fff0f0; border:2px solid #ffd0d0;">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <circle cx="18" cy="18" r="15" fill="#c02020"/>
-            <circle cx="18" cy="18" r="13" fill="#d42b2b"/>
-            <circle cx="18" cy="18" r="11" fill="#e03535"/>
-            <ellipse cx="13" cy="12" rx="5" ry="3.2" fill="rgba(255,185,185,0.55)"/>
-            <circle cx="18" cy="18" r="10.5" fill="none" stroke="rgba(90,0,0,0.18)" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <div class="card-title">Red button</div>
-        <div class="card-desc">Press it. You know you want to.</div>
+  <main class="shell">
+    <header>
+      <a class="brand" href="index.html" aria-label="Welchy-Wagers home"><span class="mark" aria-hidden="true">w</span><span class="brand-name">Welchy<span>-Wagers</span></span></a>
+      <span class="eyebrow">THE PRIVATE ARCADE</span>
+    </header>
+    <section class="intro" aria-labelledby="intro-title">
+      <div class="eyebrow">Made for a little fun</div>
+      <h1 id="intro-title">A little chance.<br>A lot of character.</h1>
+      <p>Three experiences. One beautifully dressed gaming lounge. Choose your table and enjoy the play.</p>
+    </section>
+    <div class="section-head"><h2>Pick something to play</h2><span class="count">03 experiences</span></div>
+    <nav class="games" aria-label="Games">
+      <a class="game" href="red-button.html">
+        <div class="game-icon" aria-hidden="true">🔴</div><h3>The red button</h3>
+        <p>One button. One press. Bring your own music and make it yours.</p><span class="launch">Open experience ↗</span>
       </a>
-
-      <!-- BLACKJACK -->
-      <a class="card" href="blackjack.html">
-        <div class="icon" style="background:#f0f0f0; border:2px solid #ddd;">
-          <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-            <!-- Card 1 (slightly behind, tilted left) -->
-            <rect x="2" y="7" width="22" height="28" rx="3" fill="#fff" stroke="#ccc" stroke-width="1.2" transform="rotate(-8 13 21)"/>
-            <text x="5" y="18" font-family="serif" font-size="10" font-weight="900" fill="#111" transform="rotate(-8 13 21)">A</text>
-            <text x="5" y="27" font-family="serif" font-size="9" fill="#111" transform="rotate(-8 13 21)">♠</text>
-            <!-- Card 2 (front, tilted right) -->
-            <rect x="14" y="5" width="22" height="28" rx="3" fill="#fff" stroke="#ccc" stroke-width="1.2" transform="rotate(6 25 19)"/>
-            <text x="16" y="17" font-family="serif" font-size="10" font-weight="900" fill="#d42b2b" transform="rotate(6 25 19)">K</text>
-            <text x="17" y="26" font-family="serif" font-size="9" fill="#d42b2b" transform="rotate(6 25 19)">♥</text>
-          </svg>
-        </div>
-        <div class="card-title">Blackjack</div>
-        <div class="card-desc">Beat the dealer to 21.</div>
+      <a class="game" href="blackjack.html">
+        <div class="game-icon" aria-hidden="true">🂡</div><h3>Blackjack</h3>
+        <p>Play your hand, read the dealer, and try to land on 21.</p><span class="launch">Play blackjack ↗</span>
       </a>
-
-      <!-- ROULETTE -->
-      <a class="card" href="roulette.html">
-        <div class="icon" style="background:#0f0f0f; border:2px solid #333;">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="17" fill="#1a1a1a" stroke="#444" stroke-width="1.5"/>
-            <circle cx="20" cy="20" r="12" fill="none" stroke="#333" stroke-width="1"/>
-            <!-- coloured slices hint -->
-            <path d="M20 3 A17 17 0 0 1 34.7 11.5 L20 20Z" fill="#d42b2b" opacity="0.9"/>
-            <path d="M34.7 11.5 A17 17 0 0 1 34.7 28.5 L20 20Z" fill="#222"/>
-            <path d="M34.7 28.5 A17 17 0 0 1 20 37 L20 20Z" fill="#d42b2b" opacity="0.7"/>
-            <path d="M20 37 A17 17 0 0 1 5.3 28.5 L20 20Z" fill="#222"/>
-            <path d="M5.3 28.5 A17 17 0 0 1 5.3 11.5 L20 20Z" fill="#d42b2b" opacity="0.5"/>
-            <path d="M5.3 11.5 A17 17 0 0 1 20 3 L20 20Z" fill="#222"/>
-            <circle cx="20" cy="20" r="5" fill="#111" stroke="#555" stroke-width="1"/>
-            <circle cx="20" cy="20" r="2" fill="#d42b2b"/>
-            <!-- pointer -->
-            <polygon points="20,1 17,7 23,7" fill="#ffd700"/>
-          </svg>
-        </div>
-        <div class="card-title">Roulette</div>
-        <div class="card-desc">Spin the wheel. Risk your points.</div>
+      <a class="game" href="roulette.html">
+        <div class="game-icon" aria-hidden="true">🎡</div><h3>Roulette</h3>
+        <p>Place points on the table and see where the wheel stops.</p><span class="launch">Spin the wheel ↗</span>
       </a>
-
-    </div>
-
-    <div id="footer">made with curiosity &amp; claude</div>
-  </div>
+    </nav>
+    <footer><span>Welchy-Wagers</span><span>Welchy-Wagers · For entertainment only</span></footer>
+  </main>
 </body>
 </html>
