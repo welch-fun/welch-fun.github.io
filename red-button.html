@@ -153,7 +153,7 @@
 
 <div id="app">
   <div id="vignette"></div>
-  <div id="btn-wrap" role="button" aria-label="Play music" tabindex="0">
+  <div id="btn-wrap" role="button" aria-label="Press the red button to play your selected music" tabindex="0">
     <div id="btn-shadow"></div>
     <div id="btn-edge"></div>
     <div id="btn-body">
@@ -332,12 +332,21 @@ function onRelease() {
   setTimeout(playMusic, 60);
 }
 
-btnWrap.addEventListener('mousedown', onPress);
-window.addEventListener('mouseup', onRelease);
-btnWrap.addEventListener('touchstart', (e) => { e.preventDefault(); onPress(); }, { passive: false });
-window.addEventListener('touchend', onRelease);
-btnWrap.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onPress(); } });
-btnWrap.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') onRelease(); });
+// Pointer events unify mouse, touch and pen input without double-firing.
+btnWrap.addEventListener('pointerdown', (e) => {
+  if (e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  if (btnWrap.setPointerCapture) btnWrap.setPointerCapture(e.pointerId);
+  onPress();
+});
+btnWrap.addEventListener('pointerup', onRelease);
+btnWrap.addEventListener('pointercancel', onRelease);
+btnWrap.addEventListener('lostpointercapture', onRelease);
+btnWrap.addEventListener('keydown', (e) => {
+  if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); onPress(); }
+});
+btnWrap.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onRelease(); } });
+btnWrap.addEventListener('blur', onRelease);
 </script>
 </body>
 </html>
