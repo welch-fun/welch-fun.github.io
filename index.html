@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101114">
   <meta name="description" content="A small collection of playful browser games and experiments.">
-  <title>welch.fun — Little things to play</title>
+  <title>Welchy-Wagers — Little things to play</title>
   <style>
     :root{color-scheme:dark;--bg:#101114;--panel:#191b20;--panel2:#20232a;--line:#30343d;--muted:#9a9eaa;--text:#f5f6f8;--red:#ef4444;--gold:#f4c76b}
-    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% -18%,#30333d 0,transparent 55%),var(--bg)}
+    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% -18%,#473b2a 0,transparent 58%),radial-gradient(ellipse at 50% 100%,#142d22 0,transparent 60%),var(--bg)}
     a{color:inherit}.shell{width:min(1040px,calc(100% - 40px));margin:auto;padding:64px 0 32px}
     header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:64px}
     .brand{display:flex;align-items:center;gap:13px;text-decoration:none}.mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#fb6666,#c52232);box-shadow:0 8px 28px #e43a3a35;font-weight:900;font-size:25px;transform:rotate(-5deg)}.brand-name{font-size:23px;font-weight:850;letter-spacing:-1px}.brand-name span{color:#ff6868}
@@ -16,27 +16,33 @@
     .intro{max-width:650px;margin:0 auto 38px;text-align:center}.intro h1{font-size:clamp(38px,7vw,64px);line-height:1.02;letter-spacing:-3px;margin:13px 0 15px}.intro p{color:var(--muted);font-size:16px;line-height:1.7;margin:0}
     .section-head{display:flex;align-items:end;justify-content:space-between;margin:52px 0 18px}.section-head h2{font-size:17px;margin:0;letter-spacing:-.3px}.count{font-size:12px;color:var(--muted)}
     .games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-    .game{min-height:244px;padding:23px;background:linear-gradient(160deg,#20232a,#17191e);border:1px solid var(--line);border-radius:20px;text-decoration:none;display:flex;flex-direction:column;align-items:flex-start;transition:transform .18s,border-color .18s,box-shadow .18s}
+    .game{min-height:244px;padding:23px;background:linear-gradient(145deg,rgba(42,40,34,.96),rgba(23,25,27,.98));border:1px solid #514632;border-radius:20px;text-decoration:none;display:flex;flex-direction:column;align-items:flex-start;transition:transform .18s,border-color .18s,box-shadow .18s}
     .game:hover{transform:translateY(-4px);border-color:#555b68;box-shadow:0 16px 40px #0005}.game:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
-    .game-icon{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin-bottom:25px;background:#292d36;border:1px solid #3a3f49}
-    .game h3{font-size:18px;margin:0 0 7px;letter-spacing:-.4px}.game p{font-size:13px;line-height:1.55;color:var(--muted);margin:0;max-width:240px}.launch{margin-top:auto;padding-top:20px;font-size:12px;font-weight:750;color:#ff8585}
+    .game-icon{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin-bottom:25px;background:linear-gradient(145deg,#39352c,#22252a);border:1px solid #65553a;box-shadow:inset 0 1px 0 #ffffff20,0 10px 24px #0005}
+    .game h3{font-size:18px;margin:0 0 7px;letter-spacing:-.4px}.game p{font-size:13px;line-height:1.55;color:var(--muted);margin:0;max-width:240px}.launch{margin-top:auto;padding-top:20px;font-size:12px;font-weight:750;color:#e9c77d}
     .game:nth-child(2) .game-icon{background:#222c26}.game:nth-child(3) .game-icon{background:#2b2630}
     footer{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #292c33;margin-top:62px;padding-top:20px;color:#777d89;font-size:12px}
     @media(max-width:760px){.shell{padding-top:36px}.games{grid-template-columns:1fr 1fr}header{margin-bottom:48px}.game{min-height:220px}}
     @media(max-width:480px){.shell{width:min(100% - 28px,440px)}.games{grid-template-columns:1fr}.game{min-height:190px}.game-icon{margin-bottom:17px}.intro h1{letter-spacing:-2px}.section-head{margin-top:38px}footer{flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-  </style>
+  
+    .brand-name span{color:#d9b66e}.mark{background:linear-gradient(145deg,#e6ca8a,#8c682c);color:#211a0d}.eyebrow{color:#d8bd83}
+    .game{position:relative;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff0a,0 18px 40px #0003}.game:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,#ffffff08,transparent 42%)}
+    .game-icon{box-shadow:inset 0 1px 0 #ffffff20,0 8px 20px #0004}.game:nth-child(2) .game-icon{color:#d9c28b}.game:nth-child(3) .game-icon{color:#d7ad74}
+    .launch{color:#e2c27f}.game h3{font-size:19px}.intro h1{background:linear-gradient(180deg,#fff9e9,#d9c18d);background-clip:text;-webkit-background-clip:text;color:transparent}
+    @media(max-width:760px){.games{grid-template-columns:1fr 1fr}} @media(max-width:480px){.games{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
   <main class="shell">
     <header>
-      <a class="brand" href="index.html" aria-label="welch.fun home"><span class="mark" aria-hidden="true">w</span><span class="brand-name">welch<span>fun</span></span></a>
-      <span class="eyebrow">A tiny arcade</span>
+      <a class="brand" href="index.html" aria-label="Welchy-Wagers home"><span class="mark" aria-hidden="true">w</span><span class="brand-name">Welchy<span>-Wagers</span></span></a>
+      <span class="eyebrow">THE PRIVATE ARCADE</span>
     </header>
     <section class="intro" aria-labelledby="intro-title">
       <div class="eyebrow">Made for a little fun</div>
-      <h1 id="intro-title">Little things.<br>Big distractions.</h1>
-      <p>A growing collection of small browser experiments. Pick a game, take a break, and see what happens.</p>
+      <h1 id="intro-title">A little chance.<br>A lot of character.</h1>
+      <p>Three experiences. One beautifully dressed gaming lounge. Choose your table and enjoy the play.</p>
     </section>
     <div class="section-head"><h2>Pick something to play</h2><span class="count">03 experiences</span></div>
     <nav class="games" aria-label="Games">
@@ -53,7 +59,7 @@
         <p>Place points on the table and see where the wheel stops.</p><span class="launch">Spin the wheel ↗</span>
       </a>
     </nav>
-    <footer><span>welch.fun</span><span>Small experiments, made to be played.</span></footer>
+    <footer><span>Welchy-Wagers</span><span>Welchy-Wagers · For entertainment only</span></footer>
   </main>
 </body>
 </html>
