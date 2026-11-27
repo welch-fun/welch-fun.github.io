@@ -73,7 +73,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #f1d28d;outline-offset:3p
 </main>
 <script>
 (()=>{
- const modes={easy:{risk:.08,growth:1.12},medium:{risk:.15,growth:1.22},hard:{risk:.24,growth:1.38},evil:{risk:.35,growth:1.65}};
+ const modes={easy:{risk:.08,growth:1.03},medium:{risk:.15,growth:1.11},hard:{risk:.24,growth:1.25},evil:{risk:.35,growth:1.46}};
  let balance=1000,mode='easy',bet=10,jumps=0,best=0,active=false,locked=false,mult=1;
  const $=id=>document.getElementById(id);
  const fmt=n=>Math.round(n).toLocaleString();
@@ -84,7 +84,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #f1d28d;outline-offset:3p
  }
  function drawTiles(){ $('tiles').innerHTML='';for(let i=0;i<5;i++){const d=document.createElement('div');d.className='tile'+(i===0&&jumps>0?' safe':'');d.textContent=i===0&&jumps>0?'SAFE':'MANHOLE';$('tiles').appendChild(d);} }
  function start(){if(active||locked||balance<bet)return;active=true;balance-=bet;jumps=0;mult=1;$('overlay').classList.remove('show');$('status').textContent='Stake placed. Find your rhythm.';drawTiles();render();}
- function animateCar(){const c=$('car');c.classList.remove('drive');void c.offsetWidth;c.classList.add('drive');}
+ function animateCar(){const c=$('car');c.style.top=Math.max(8,$('scene').clientHeight-parseFloat($('chicken').style.bottom||22)-58)+'px';c.classList.remove('drive');void c.offsetWidth;c.classList.add('drive');}
  function jump(){
   if(locked)return;if(!active)start();if(!active)return;
   locked=true;animateCar();$('status').textContent='Crossing…';$('chicken').style.bottom=(48+Math.min(jumps,4)*48)+'px';$('chicken').style.transform='translateX(-50%) rotate(-8deg) scale(1.08)';
